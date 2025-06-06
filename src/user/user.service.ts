@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -48,16 +48,10 @@ export class UserService {
   async changePassword(id: string, changePasswordDto: ChangePasswordDto): Promise<User | null> {
     const user = await this.userModel.findById(id).select('+token');
 
-    if (!user) {
-      // user not found exception
-      return null;
-    }
-    console.log(changePasswordDto.token + " " + user.token)
-    if(changePasswordDto.token != user.token){
-      // invalid token exception
-      return null;
-    }
-    
+    if (!user) throw new InternalServerErrorException('Invalid credentials');
+
+    if(changePasswordDto.token != user.token) throw new UnauthorizedException('Invalid credentials');
+
     const hashedPassword = await encryptPassword(changePasswordDto.password);
 
     user.password = hashedPassword;

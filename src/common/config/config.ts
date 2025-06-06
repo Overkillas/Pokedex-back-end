@@ -6,7 +6,6 @@ export default() => ({
     mailer: {
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS,
-        token: process.env.MAIL_TOKEN,
     },
     cors: {
         origin: process.env.CORS_ORIGIN,
