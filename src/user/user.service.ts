@@ -6,12 +6,13 @@ import { User, UserDocument } from './schema/user.schema';
 import { ChangePasswordDto } from '../auth/dto/change-password.dto'
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
-
+import { MailService } from '../common/services/mail.service'
+import { randomBytes } from 'crypto';
 @Injectable()
 export class UserService {
   
   constructor(
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>, private readonly mailService: MailService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -45,21 +46,21 @@ export class UserService {
     return this.userModel.findByIdAndDelete(id).exec();
   }
 
-  async changePassword(id: string, changePasswordDto: ChangePasswordDto): Promise<User | null> {
-    const user = await this.userModel.findById(id).select('+token');
-
-    if (!user) throw new InternalServerErrorException('Invalid credentials');
-
-    if(changePasswordDto.token != user.token) throw new UnauthorizedException('Invalid credentials');
-
+  async changePassword(token: string, changePasswordDto: ChangePasswordDto): Promise<User | null> {
+    const user = await this.userModel.findOne({ token });
+  
+    if (!user) throw new UnauthorizedException('Token inválido');
+  
     const hashedPassword = await encryptPassword(changePasswordDto.password);
-
+  
     user.password = hashedPassword;
-
+    user.token = undefined; 
+  
     await user.save();
-
+  
     return user;
   }
+  
 }
 
 async function encryptPassword(password: string): Promise<string> {

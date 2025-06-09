@@ -28,8 +28,8 @@ export class UserController {
     return this.userService.update(id, updateUserDto);
   }
 
-  @Patch('change-password/:id')
-  changePassword(@Param('id') id: string, @Body() changePasswordDto: ChangePasswordDto){
+  @Patch('change-password/:token')
+  changePassword(@Param('token') id: string, @Body() changePasswordDto: ChangePasswordDto){
     return this.userService.changePassword(id, changePasswordDto);
   }
 

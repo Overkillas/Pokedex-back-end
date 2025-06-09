@@ -39,8 +39,8 @@ export class AuthService {
     };
   }
 
-  async generatePasswordToken(id: string): Promise<User | null> {
-    const user = await this.userModel.findById(id);
+  async generatePasswordToken(email: string): Promise<User | null> {
+    const user = await this.userModel.findOne({ email });
 
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
@@ -50,7 +50,7 @@ export class AuthService {
 
     await user.save();
     
-    await this.mailService.sendPasswordResetEmail(user.email, token);
+    await this.mailService.sendPasswordResetEmail(email, token);
 
     return user;
   }

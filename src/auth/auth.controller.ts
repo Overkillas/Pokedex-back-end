@@ -17,8 +17,8 @@ export class AuthController {
     return user;
   }
   
-  @Patch('generate-token/:id')
-  generatePasswordToken(@Param('id') id: string){
-    return this.authService.generatePasswordToken(id);
+  @Patch('generate-token')
+  generatePasswordToken(@Body('email') email: string){
+    return this.authService.generatePasswordToken(email);
   }
 }
