@@ -46,6 +46,8 @@ export class AuthService {
 
     const token = randomBytes(4).toString('hex');
 
+
+    // const token = randomInt(0, 1_000_000).toString().padStart(6, '0');
     user.token = token;
 
     await user.save();
