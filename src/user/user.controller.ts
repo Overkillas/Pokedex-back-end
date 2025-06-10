@@ -8,10 +8,11 @@ import { ChangePasswordDto } from '../auth/dto/change-password.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('/create')
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  @Post('/create/:token')
+  create(@Param('token') token: string, @Body() createUserDto: CreateUserDto) {
+    return this.userService.create(token, createUserDto);
   }
+
 
   @Get()
   findAll() {

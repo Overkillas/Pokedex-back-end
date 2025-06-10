@@ -5,18 +5,15 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from '../user/schema/user.schema'; 
 import { MailService } from '../common/services/mail.service';
 import * as bcrypt from 'bcrypt';
-import { randomBytes, randomInt } from 'crypto';
-import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+
+import { authenticator } from 'otplib'; // import otplib
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class AuthService {
 
-  changePassword(id: string, changePasswordDto: ChangePasswordDto) {
-    throw new Error('Method not implemented.');
-  }
-  
   constructor(
     @InjectModel('User') private readonly userModel: Model<UserDocument>,
     private readonly mailService: MailService,
@@ -39,15 +36,56 @@ export class AuthService {
     };
   }
 
+  generateTotpToken(email: string): string {
+    const secret = this.getSecretForUser(email);
+    authenticator.options = {
+      step: 1800,
+    };
+    return authenticator.generate(secret);
+  }
+
+  validateTotpToken(email: string, token: string): boolean {
+    const secret = this.getSecretForUser(email);
+    return authenticator.check(token, secret);
+  }
+
+  private getSecretForUser(email: string): string {
+    const secretBase = this.configService.get('TOTP_SECRET') || 'minhaSuperChavePrivada';
+    return secretBase + ':' + email;
+  }
+
+  async sendTotpTokenByEmail(email: string): Promise<void> {
+    const token = this.generateTotpToken(email);
+    await this.mailService.sendPasswordResetEmail(email, token);
+  }
+
+  async verifyTokenAndCreateUser(email: string, token: string, password: string, name: string): Promise<User> {
+    const isValid = this.validateTotpToken(email, token);
+    if (!isValid) throw new UnauthorizedException('Token inválido ou expirado');
+  
+    const existing = await this.userModel.findOne({ email });
+    if (existing) throw new UnauthorizedException('Usuário já existe');
+  
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new this.userModel({
+      email,
+      password: hashedPassword,
+      name,
+    });
+  
+    const saved = await newUser.save();
+    return saved.toObject() as User;
+  }
+
   async generatePasswordToken(email: string): Promise<User | null> {
     const user = await this.userModel.findOne({ email });
 
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
-    
-    const token = randomInt(0, 1_000_000).toString().padStart(6, '0');
-    // const token = randomBytes(4).toString('hex');
+    const token = randomBytes(4).toString('hex');
 
+
+    // const token = randomInt(0, 1_000_000).toString().padStart(6, '0');
     user.token = token;
 
     await user.save();
@@ -64,9 +102,5 @@ export class AuthService {
       { sub: userId },
       { expiresIn },
     );
-  }
-
-  private async generateTotpToken(){
-    
   }
 }

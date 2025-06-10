@@ -8,7 +8,7 @@ export class JwtAuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest();
 
-    const publicPaths = ['/auth/login', '/users/create', '/auth/generate-token', 'users/change-password'];
+    const publicPaths = ['/auth/login', 'auth/send-totp-token', '/users/create', '/auth/generate-token', 'users/change-password'];
 
     if (publicPaths.includes(request.url)) {
       return true;
