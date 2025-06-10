@@ -17,7 +17,6 @@ export class UserService {
   ) {}
 
   async create(token: string, createUserDto: CreateUserDto): Promise<User> {
-    console.log("Creating user with token:", token);
     const { email, password } = createUserDto;
 
     const isValidToken = this.authService.validateTotpToken(email, token);
@@ -77,20 +76,25 @@ export class UserService {
   }
 
   async changePassword(token: string, changePasswordDto: ChangePasswordDto): Promise<User | null> {
-    const user = await this.userModel.findOne({ token });
+    const { email, password} = changePasswordDto
+    
+    const user = await this.userModel.findOne({ email });
+
+    const isValidToken = this.authService.validateTotpToken(email, token);
+    if (!isValidToken) {
+      throw new UnauthorizedException('Token inválido ou expirado');
+    }
   
     if (!user) throw new UnauthorizedException('Token inválido');
   
-    const hashedPassword = await encryptPassword(changePasswordDto.password);
+    const hashedPassword = await encryptPassword(password);
   
     user.password = hashedPassword;
-    user.token = undefined; 
   
     await user.save();
   
     return user;
-  }
-  
+  }  
 }
 
 async function encryptPassword(password: string): Promise<string> {

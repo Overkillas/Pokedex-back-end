@@ -15,8 +15,7 @@ export class AuthController {
     }
 
     return user;
-  }
-  
+  } 
 
   @Post('send-totp-token')
   async sendTotpToken(@Body('email') email: string) {
