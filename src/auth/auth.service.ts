@@ -5,7 +5,7 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from '../user/schema/user.schema'; 
 import { MailService } from '../common/services/mail.service';
 import * as bcrypt from 'bcrypt';
-import { randomBytes } from 'crypto';
+import { randomBytes, randomInt } from 'crypto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -44,10 +44,10 @@ export class AuthService {
 
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
-    const token = randomBytes(4).toString('hex');
+    
+    const token = randomInt(0, 1_000_000).toString().padStart(6, '0');
+    // const token = randomBytes(4).toString('hex');
 
-
-    // const token = randomInt(0, 1_000_000).toString().padStart(6, '0');
     user.token = token;
 
     await user.save();
@@ -64,5 +64,9 @@ export class AuthService {
       { sub: userId },
       { expiresIn },
     );
+  }
+
+  private async generateTotpToken(){
+    
   }
 }

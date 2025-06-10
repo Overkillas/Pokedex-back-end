@@ -11,22 +11,22 @@ export class CaptureService {
     @InjectModel(Animal.name) private animalModel: Model<AnimalDocument>,
   ) {}
 
-  async captureAnimal(userId: string, animalName: string, confidence: number) {
-    let animal = await this.animalModel.findOne({ name: animalName });
-    if (!animal) {
-      animal = new this.animalModel({ name: animalName });
-      await animal.save();
-    }
+  // async captureAnimal(userId: string, animalName: string, confidence: number) {
+  //   let animal = await this.animalModel.findOne({ name: animalName });
+  //   if (!animal) {
+  //     animal = new this.animalModel({ name: animalName });
+  //     await animal.save();
+  //   }
 
-    const capture = new this.captureModel({
-      user: userId,
-      animal: animal._id,
-      confidence: confidence,
-      capturedAt: new Date(),
-    });
+  //   const capture = new this.captureModel({
+  //     user: userId,
+  //     animal: animal._id,
+  //     confidence: confidence,
+  //     capturedAt: new Date(),
+  //   });
 
-    return capture.save();
-  }
+  //   return capture.save();
+  // }
 
   async getAllCaptures() {
     return this.captureModel.find().populate('user').populate('animal');
@@ -101,6 +101,60 @@ export class CaptureService {
     ]);
   
     return result[0] || { animalId, averageConfidence: null };
+  }
+  
+  // -----------------------------------------------
+  // -----------------------------------------------
+  // -----------------------------------------------
+  //             VERSÃO COM PONTOS
+  // -----------------------------------------------
+  // -----------------------------------------------
+  // ----------------------------------------------- 
+
+  async captureAnimal(userId: string, animalName: string, confidence: number) {
+
+    if (animalName.toLowerCase() === 'uncertain') {
+      return null;
+    }
+
+    let animal = await this.animalModel.findOne({ name: animalName });
+    if (!animal) {
+      animal = new this.animalModel({ name: animalName });
+      await animal.save();
+    }
+  
+    const userCaptures = await this.captureModel.countDocuments({
+      user: userId,
+      animal: animal._id,
+    });
+  
+    const totalSightings = await this.captureModel.countDocuments({
+      animal: animal._id,
+    });
+  
+    const basePoints = 100;
+    const points = basePoints * (1 / (userCaptures + 1)) * (1 / (totalSightings + 1));
+  
+    const capture = new this.captureModel({
+      user: userId,
+      animal: animal._id,
+      confidence,
+      capturedAt: new Date(),
+      points,
+    });
+  
+    return capture.save();
+  }
+
+  async getUserScoreDetails(userId: string): Promise<{ totalPoints: number, totalCaptures: number }> {
+    const captures = await this.captureModel.find({ user: userId }, 'points');
+    
+    const totalPoints = Math.round(captures.reduce((sum, capture) => sum + (capture.points || 0), 0));
+    
+    return {
+      totalPoints,
+      totalCaptures: captures.length,
+    };
   }
   
 }

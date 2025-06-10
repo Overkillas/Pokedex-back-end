@@ -14,7 +14,7 @@ export class User {
   @Prop()
   password: string;
 
-  @Prop({ required: false, select: false })
+  @Prop({ required: false, select: false})
   token?: string;
 
 }

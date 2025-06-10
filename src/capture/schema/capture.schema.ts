@@ -21,6 +21,9 @@ export class Capture {
 
   // Adicionar pontos aqui por captura 
   // (considerando a quantidade deles capturados por esse usuario e sightings total do animal, como modificadores nos pontos)
+
+  @Prop()
+  points?: number;
 }
 
 export const CaptureSchema = SchemaFactory.createForClass(Capture);
