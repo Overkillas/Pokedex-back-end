@@ -20,14 +20,14 @@ export class MailService {
     });
   }
 
-  async sendPasswordResetEmail(userMail: string, token: string): Promise<void> {
+  async sendTokenEmail(userMail: string, token: string): Promise<void> {
     const mailOptions = {
       from: `"Desafio I.A." <${this.mailUser}>`,
       to: userMail,
       subject: 'Recuperação de Senha',
       html: `
-        <p>Você solicitou a recuperação de senha.</p>
-        <p>Cole o seguinte token para redefinir sua senha:</p>
+        <p>Você solicitou um token.</p>
+        <p>Cole o seguinte token para confirmar sua identidade:</p>
         <h2>${token}</h2>
         <p>Se você não solicitou isso, ignore este e-mail.</p>
       `,
