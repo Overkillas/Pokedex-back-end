@@ -112,7 +112,6 @@ export class CaptureService {
   // ----------------------------------------------- 
 
   async captureAnimal(userId: string, animalName: string, confidence: number) {
-
     if (animalName.toLowerCase() === 'uncertain') {
       return null;
     }
@@ -122,29 +121,37 @@ export class CaptureService {
       animal = new this.animalModel({ name: animalName });
       await animal.save();
     }
-  
+
+    const animalId = animal._id;
+
     const userCaptures = await this.captureModel.countDocuments({
       user: userId,
-      animal: animal._id,
+      animal: animalId,
     });
-  
-    const totalSightings = await this.captureModel.countDocuments({
-      animal: animal._id,
+
+    const totalCapturesForAnimal = await this.captureModel.countDocuments({
+      animal: animalId,
     });
-  
-    const basePoints = 100;
-    const points = basePoints * (1 / (userCaptures + 1)) * (1 / (totalSightings + 1));
-  
+
+    let rarity = 1;
+    if (totalCapturesForAnimal <= 10) rarity = 3;
+    else if (totalCapturesForAnimal <= 50) rarity = 2;
+    
+    const DECAY_PER_CAPTURE = 10;
+    const basePoints = Math.max(20, 100 - (userCaptures * DECAY_PER_CAPTURE));
+    const finalPoints = basePoints * rarity;
+
     const capture = new this.captureModel({
       user: userId,
-      animal: animal._id,
+      animal: animalId,
       confidence,
       capturedAt: new Date(),
-      points,
+      points: finalPoints,
     });
-  
+
     return capture.save();
   }
+
 
   async getUserScoreDetails(userId: string): Promise<{ totalPoints: number, totalCaptures: number }> {
     const captures = await this.captureModel.find({ user: userId }, 'points');

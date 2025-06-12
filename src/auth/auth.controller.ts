@@ -15,10 +15,11 @@ export class AuthController {
     }
 
     return user;
-  }
-  
-  @Patch('generate-token')
-  generatePasswordToken(@Body('email') email: string){
-    return this.authService.generatePasswordToken(email);
+  } 
+
+  @Post('send-totp-token')
+  async sendTotpToken(@Body('email') email: string) {
+    await this.authService.sendTotpTokenByEmail(email);
+    return { message: 'TOTP token enviado com sucesso' };
   }
 }
