@@ -7,6 +7,9 @@ export default() => ({
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS,
     },
+    totp: {
+        secret: process.env.TOTP_SECRET,
+    },
     cors: {
         origin: process.env.CORS_ORIGIN,
     }

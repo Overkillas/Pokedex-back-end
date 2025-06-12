@@ -5,11 +5,13 @@ import { User, UserSchema } from './schema/user.schema';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { CaptureModule } from 'src/capture/capture.module';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-    CaptureModule
+    CaptureModule,
+    AuthModule
   ],
   providers: [UserService],
   controllers: [UserController],
