@@ -16,6 +16,9 @@ export class User {
 
   @Prop({ required: false, select: false })
   token?: string;
+
+  @Prop({required: false, default: 1})
+  level: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

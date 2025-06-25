@@ -3,12 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Capture, CaptureDocument } from './schema/capture.schema';
 import { Model, Types } from 'mongoose';
 import { Animal, AnimalDocument } from 'src/animal/schema/animal.schema';
+import { UserProgressService } from 'src/user-progress/user-progess.service';
 
 @Injectable()
 export class CaptureService {
   constructor(
     @InjectModel(Capture.name) private captureModel: Model<CaptureDocument>,
     @InjectModel(Animal.name) private animalModel: Model<AnimalDocument>,
+    private readonly userProgressService: UserProgressService,
   ) {}
 
   // async captureAnimal(userId: string, animalName: string, confidence: number) {
@@ -148,6 +150,12 @@ export class CaptureService {
       capturedAt: new Date(),
       points: finalPoints,
     });
+
+    const userInfo = await this.getUserScoreDetails(userId);
+
+    const a = userInfo.totalPoints
+
+    await this.userProgressService.updateUserLevel(userId, a);
 
     return capture.save();
   }

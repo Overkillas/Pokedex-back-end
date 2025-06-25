@@ -19,7 +19,7 @@ export class ImageProcessingService {
     });
 
     const response$ = this.httpService.post(
-      'http://127.0.0.1:5000/prediction',
+      'http://flask:5000/prediction',
       formData,
       { headers: formData.getHeaders() }
     );

@@ -16,6 +16,7 @@ export class UserService {
     private readonly captureService: CaptureService,
     private readonly authService: AuthService,
   ) {}
+  // test
 
   async create(token: string, createUserDto: CreateUserDto): Promise<User> {
     const { email, password } = createUserDto;

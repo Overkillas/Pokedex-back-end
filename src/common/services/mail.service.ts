@@ -24,7 +24,7 @@ export class MailService {
     const mailOptions = {
       from: `"Desafio I.A." <${this.mailUser}>`,
       to: userMail,
-      subject: 'Recuperação de Senha',
+      subject: 'Confirme seu email',
       html: `
         <p>Você solicitou um token.</p>
         <p>Cole o seguinte token para confirmar sua identidade:</p>
