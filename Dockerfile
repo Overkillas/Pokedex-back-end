@@ -1,8 +1,14 @@
 FROM node:20
 
 WORKDIR /app
-COPY . .
+
+COPY package*.json ./
+
 RUN npm install
+
+COPY . .
+
 RUN npm run build
 
-CMD ["npm", "run", "start:prod"]
+CMD ["sh", "-c", "npm run start:prod"]
+
