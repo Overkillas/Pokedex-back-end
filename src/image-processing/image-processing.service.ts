@@ -19,7 +19,7 @@ export class ImageProcessingService {
     });
 
     const response$ = this.httpService.post(
-      'http://flask:5000/prediction',
+      'http://classificationmodel-production.up.railway.app/prediction',
       formData,
       { headers: formData.getHeaders() }
     );
