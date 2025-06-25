@@ -19,7 +19,7 @@ export class ImageProcessingService {
     });
 
     const response$ = this.httpService.post(
-      'http://classificationmodel-production.up.railway.app/prediction',
+      'https://classificationmodel-production.up.railway.app/prediction',
       formData,
       { headers: formData.getHeaders() }
     );
