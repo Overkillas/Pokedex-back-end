@@ -1,15 +1,12 @@
 // image-processing.service.ts
 import { Injectable } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
+import axios from 'axios';
 import * as FormData from 'form-data';
-import { lastValueFrom } from 'rxjs';
 import { CaptureService } from 'src/capture/capture.service';
 
 @Injectable()
 export class ImageProcessingService {
-  constructor(private readonly httpService: HttpService,
-              private readonly captureService: CaptureService
-  ) {}
+  constructor(private readonly captureService: CaptureService) {}
 
   async sendToPredictionAPI(file: Express.Multer.File): Promise<any> {
     const formData = new FormData();
@@ -18,13 +15,15 @@ export class ImageProcessingService {
       contentType: file.mimetype,
     });
 
-    const response$ = this.httpService.post(
+    const response = await axios.post(
       'https://classificationmodel-production.up.railway.app/prediction',
       formData,
-      { headers: formData.getHeaders() }
+      {
+        headers: formData.getHeaders(),
+        maxBodyLength: Infinity, // evita erros com arquivos grandes
+      }
     );
 
-    const response = await lastValueFrom(response$);
     return response.data;
   }
 
@@ -38,5 +37,3 @@ export class ImageProcessingService {
     };
   }
 }
-
-
