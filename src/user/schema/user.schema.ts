@@ -14,6 +14,9 @@ export class User {
   @Prop()
   password: string;
 
+  @Prop({ default: 'Treinador'})
+  title: string;
+
   @Prop({ required: false, select: false })
   token?: string;
 
